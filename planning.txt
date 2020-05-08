@@ -9,7 +9,7 @@ VARIABLES:
 
 FUNCTIONS:
 splash page: 
-- read the game mode menu to direct the player to the correct page
+- read the game mode menu to direct the player to the correct page [done]
 
 game:
 - display(array): iterates through array and update each object's el's src
@@ -87,12 +87,11 @@ game:
 - create a grid by making rows
 
 INTERFACE: 
-splash page: 
+splash page: [done]
 - title
 - instructions
 - a menu to pick from standard mode and salvo mode
 - a button to start playing
-- reset button
 
 game: 
 - 2 11x11 grids side by side
@@ -106,13 +105,14 @@ game:
 - a space with a ship (on player's grid) is grey
 - a guessed space that has a ship is read
 - each space is a square, with width that should be 2.5% of viewport width
+- reset button
 
 - start with the ships on the left of the top 5 rows
 
 - a button to lock in ship position
 
 FLOW:
-- player selects a mode on index.html, and button onclick brings the player to the correct page for the mode
+- player selects a mode on index.html, and button onclick brings the player to the correct page for the mode [done]
 - generate grids for both players
 - randomize ship placements for computer's grid
 - let player move ships until lock button is pressed
