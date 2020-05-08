@@ -1,15 +1,69 @@
 <!doctype html>
 <html>
 	<head>
-		<title></title>
-		<style></style>
+		<title>Battleship</title>
+		<link href="https://fonts.googleapis.com/css?family=Press+Start+2P&display=swap" rel="stylesheet">
+		<style>
+			body {
+				text-align: center;
+				background-color: #E57373;
+				margin: 16px 0px;
+				font: 400 20pt TW Cen MT;
+			}
+			h1 {
+				font: 300 50pt "Press Start 2P"
+			}
+			h2 {
+				font: 500 25pt "Press Start 2P";
+			}
+			select {
+				font: inherit;
+				border-radius: 4px;
+			}
+			button {
+				background-color: inherit;
+				font: inherit;
+				border-radius: 4px;
+				height: 36px;
+				padding: 0px 16px;
+				margin: 8px 14px;
+				outline: none;
+			}
+			button:hover {
+				box-shadow: 0px 2px 4px -1px rgba(0,0,0,.2), 0px 4px 5px 0px rgba(0,0,0,.14), 0px 1px 10px 0px rgba(0,0,0,.12);
+			}
+			button:active {
+				box-shadow: 0px 5px 5px -3px rgba(0,0,0,.2), 0px 8px 10px 1px rgba(0,0,0,.14), 0px 3px 14px 2px rgba(0,0,0,.12);
+			}
+		</style>
 		<script>
-			function initialize() {
-				
+			function direct() {
+				open(document.getElementById("selection").mode.value);
 			}
 		</script>
 	</head>
-	<body onload="initialize();">
-		
+	<body>
+		<h1>Battleship</h1>
+		<h2>Instructions</h2>
+		<br />
+		<div>
+			Start by placing your ships where ever you desire.  Click on the ship that you want to move.  Then, press 1 on your keyboard to rotate the ship counter clockwise.  Press 2 to rotate the ship clockwise.  Press the arrow keys on your keyboard to move the ship in the corresponding direction.  Once you're satisfied with all the ships' placements, click "Start" to begin the round.<br />
+			The objective of the game is to sink all your opponent's ships before your opponent sink all of yours.  A ship is sunk once all the spaces it takes up has been torpedoed.<br />
+			To torpedo a space on your opponent's grid, simply click on it.  It will change color to indicate what you hit.  It it turned white, then you hit water.  If it turns red, then you hit a ship.<br />
+			In standard mode, you get to go again if you hit a ship.<br />
+			In salvo mode, you get one hit per ship still afloat on your grid.  You do not go again once you hit a ship<br />
+			The game is over when a player has all of its ships sunk.
+		</div>
+		<br /><br />
+		<form id="selection">
+			<label>
+				Mode: <select name="mode">
+					<option value="standard.html">Standard</option>
+					<option value="salvo.html">Salvo</option>
+				</select>
+			</label>
+		</form>
+		<br />
+		<button onclick="direct();">Play</button>
 	</body>
 </html>
