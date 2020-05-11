@@ -97,19 +97,19 @@ game:
 - 2 11x11 grids side by side
     - rows labeled 1-10
     - columns labeled A-J
-    - player's grid in the middle, computer's grid on the right
-- a scrollable log of player moves on the left
+    - player's grid in the middle, computer's grid on the right [done]
+- a scrollable log of player moves on the left [done]
 
 - a space on the grid that hasn't been guessed yet is blue
 - a guessed space that has no ship is white
 - a space with a ship (on player's grid) is grey
-- a guessed space that has a ship is read
+- a guessed space that has a ship is red
 - each space is a square, with width that should be 2.5% of viewport width
-- reset button
+- reset button [done]
 
 - start with the ships on the left of the top 5 rows
 
-- a button to lock in ship position
+- a button to lock in ship position [done]
 
 FLOW:
 - player selects a mode on index.html, and button onclick brings the player to the correct page for the mode [done]
