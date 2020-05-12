@@ -28,6 +28,16 @@ body {
 #computer {
     left: 59%;
 }
+.space {
+    display: inline-block;
+    width: 3.3vw;
+    height: 3.3vw;
+    vertical-align: top;
+    text-align: center;
+    border: thin solid black;
+    align-items: center;
+    font-size: 2.5vw;
+}
 
 button {
     background-color: inherit;
