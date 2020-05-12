@@ -1,5 +1,5 @@
 VARIABLES:
-- array representing a player's grid to hold arrays that represent a row of spaces, each subarray containing an object that's the back end representation of the image on a grid.  
+- array representing a player's grid to hold arrays that represent a row of spaces, each subarray containing an object that's the back end representation of the image on a grid. [done]
     - add properties to track how many ships are left: number
 - humanTurn: boolean
 - ship name to move stored as a string
@@ -73,18 +73,18 @@ game:
     - allow moving ships again
     - regenerate computer's grid
     - clear log
-- create space objects
+- create space objects [done]
     - x coord: string
     - y coord: number
     - haveBeenGuessed: boolean
     - ship: null or string
-    - el: HTMLImageElement
+    - el: HTMLSpanElement
     - isHumanGrid: boolean
     - selected: boolean - used for highlighting a ship to move
-- create a row of spaces images, that have a path to the backend space object  
+- create a row of spaces images, that have a path to the backend space object  [done]
     - the space objects of the same row are put into an array
     - images have an onclick event listener that calls a function that processes selections, and passes in its backend representation
-- create a grid by making rows
+- create a grid by making rows [done]
 
 INTERFACE: 
 splash page: [done]
@@ -94,7 +94,7 @@ splash page: [done]
 - a button to start playing
 
 game: 
-- 2 11x11 grids side by side
+- 2 11x11 grids side by side [done]
     - rows labeled 1-10
     - columns labeled A-J
     - player's grid in the middle, computer's grid on the right [done]
@@ -104,7 +104,7 @@ game:
 - a guessed space that has no ship is white
 - a space with a ship (on player's grid) is grey
 - a guessed space that has a ship is red
-- each space is a square, with width that should be 2.5% of viewport width
+- each space is a square, with width that should be 3.4% of viewport width [done]
 - reset button [done]
 
 - start with the ships on the left of the top 5 rows
@@ -113,7 +113,7 @@ game:
 
 FLOW:
 - player selects a mode on index.html, and button onclick brings the player to the correct page for the mode [done]
-- generate grids for both players
+- generate grids for both players [done]
 - randomize ship placements for computer's grid
 - let player move ships until lock button is pressed
 - when it's the human's turn, click spaces on opponent's grid, which calls selection function, passing in that space's backend object to handle what happends
@@ -126,7 +126,7 @@ space object properties:
     - y coord: number
     - haveBeenGuessed: boolean
     - ship: null or string
-    - el: HTMLImageElement
+    - el: HTMLSpanElement
     - isHumanGrid: boolean
     - selected: boolean - used for highlighting a ship to move
 
