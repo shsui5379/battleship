@@ -7,7 +7,7 @@ const A = 65; //capital letter ASCII offset
 
 const SHIPS = [{name: "aircraft carrier", length: 5}, {name: "battleship", length: 4}, {name: "destroyer", length: 3}, {name: "submarine", length: 3}, {name: "patrol boat", length: 2}]; //ships and number of spaces
 
-function initialize() {
+function initialize(turnDeterminator) {
     //grids
     humanGrid = [];
     humanGrid.ships = 5;
@@ -17,18 +17,23 @@ function initialize() {
     //elements
     humanGridEl = document.getElementById("human");
     computerGridEl = document.getElementById("computer");
+    logEl = document.getElementById("logBox");
+    buttonEl = document.getElementById("btn");
 
     //states
     humanTurn = true;
     shipSetup = true;
     roundOver = false;
     shipToMove = undefined;
+    logStr = "";
 
     //create grid
-    grid(10, 10, humanGrid, humanGridEl, true);
-    grid(10, 10, computerGrid, computerGridEl, false);
+    grid(10, 10, humanGrid, humanGridEl, true, turnDeterminator);
+    grid(10, 10, computerGrid, computerGridEl, false, turnDeterminator);
 
-    placeRandomShips(computerGrid, SHIPS); //populate computer's grid with random ships
+    //populate grids
+    placeRandomShips(computerGrid, SHIPS);
+    presetShip(humanGrid, SHIPS);
 
     //display
     refresh(humanGrid, true);
@@ -36,23 +41,33 @@ function initialize() {
 }
 
 //objects
-function Space(x, y, isOnHumanGrid, el) { //represents a space on the grid
+function Space(x, y, isOnHumanGrid, el, gridArr) { //represents a space on the grid
     this.x = x;
     this.y = y;
     this.isOnHumanGrid = isOnHumanGrid;
     this.el = el;
-    this.highlight = false;
     this.hasBeenGuessed = false;
+    this.gridArr = gridArr;
 }
-Space.prototype.select = function() { //handles a space being selected
-    
+Space.prototype.select = function(turnDeterminator, event) { //handles a space being selected
+    if (!roundOver) {
+        if (shipSetup) { 
+            if (this.isOnHumanGrid && this.ship != undefined) { //selecting a ship to move
+                shipToMove = this.ship;
+                refresh(this.gridArr, this.isOnHumanGrid);
+            }
+        } else if (((this.isOnHumanGrid && event == undefined) || (!this.isOnHumanGrid && humanTurn)) && !this.hasBeenGuessed) { //torpedo opponent's grid
+            this.hasBeenGuessed = true;
+            refresh(this.gridArr, this.isOnHumanGrid);
+            log("test");
+        }
+    }
 }
 
 //grid generation on display
 function labelSpace(label, grid) { //adds a label block to the grid (ie: 1-10, A-J)
     var tmp = document.createElement("span");
     tmp.className = "space";
-    //tmp.style.backgroundColor = BLUE;
     tmp.innerHTML = label;
     grid.appendChild(tmp);
 }
@@ -64,33 +79,31 @@ function headerRow(spaces, grid) { //creates column labels: A-J
     var end = document.createElement("br");
     grid.appendChild(end);
 }
-function addSpace(x, y, isOnHumanGrid, grid) { //creates a space on the board
+function addSpace(x, y, isOnHumanGrid, grid, callback, gridArr) { //creates a space on the board
     var tmpEl = document.createElement("span");
-    var tmpObj = new Space(x, y, isOnHumanGrid, tmpEl);
+    var tmpObj = new Space(x, y, isOnHumanGrid, tmpEl, gridArr);
     tmpEl.className = "space";
-    //tmpEl.style.backgroundColor = BLUE;
     tmpEl.space = tmpObj;
-    tmpEl.addEventListener("click", tmpEl.space.select);
+    tmpEl.addEventListener("click", function() {tmpEl.space.select(callback, event)});
     grid.appendChild(tmpEl);
     return tmpObj;
 }
-function addRow(label, spaces, grid, isOnHumanGrid) { //creates a row number label with spaces space on grid grid
+function addRow(label, spaces, grid, isOnHumanGrid, callback, gridArr) { //creates a row number label with spaces space on grid grid
     var rowArr = [];
     labelSpace(label+1, grid);
     for (var i=0; i!=spaces; i++) {
-        var tmp = addSpace(i, label, isOnHumanGrid, grid);
+        var tmp = addSpace(i, label, isOnHumanGrid, grid, callback, gridArr);
         rowArr.push(tmp);
     }
     var end = document.createElement("br");
     grid.appendChild(end);
-    return rowArr;
+    gridArr.push(rowArr);
 }
-function grid(row, col, grid, gridEl, isOnHumanGrid) { //creates a grid of row rows, col columns
+function grid(row, col, grid, gridEl, isOnHumanGrid, turnDeterminator) { //creates a grid of row rows, col columns
     var tmp;
     headerRow(col, gridEl);
     for (var i=0; i!=row; i++) {
-        tmp = addRow(i, col, gridEl, isOnHumanGrid);
-        grid.push(tmp);
+        addRow(i, col, gridEl, isOnHumanGrid, turnDeterminator, grid);
     }
 }
 
@@ -187,6 +200,14 @@ function canMove(board, initX, initY, horizontal, positiveDir) { //determine if 
     return true;
 }
 
+function presetShip(board, ships) { //preloads ships onto a board for user configuration
+    for (var ship in ships) {
+        for (var i=0; i!=ships[ship].length; i++) {
+            board[ship][i].ship = ships[ship].name;
+        }
+    }
+}
+
 function refresh(board, shipsVisible) { //refreshed the displayed board based on array
     for (var row of board) {
         for (var space of row) {
@@ -226,7 +247,7 @@ function refresh(board, shipsVisible) { //refreshed the displayed board based on
                     space.el.style.backgroundColor = BLUE;
                     break;
             }
-            if (space.highlight) {
+            if (shipsVisible && shipToMove != undefined && space.ship == shipToMove) {
                 space.el.style.borderColor = "#76FF03";
             }
         }
@@ -240,9 +261,20 @@ function randomInteger(lower, upper) {  //random number generator
 }
 
 function buttonAction() {
-    
+    if (shipSetup) {
+        shipSetup = false;
+        shipToMove = undefined;
+        buttonEl.innerHTML = "Reset";
+        refresh(humanGrid, true);
+    } else {
+        if (confirm("Are you sure you want to reset the game?  This cannot be undone.")) {
+            shipSetup = true;
+            buttonEl.innerHTML = "Start"
+        }
+    }
 }
 
-function reset() {
-
+function log(message) {
+    logStr += message + "<br />";
+    logEl.innerHTML = logStr;
 }
