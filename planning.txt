@@ -1,18 +1,18 @@
 VARIABLES:
-- array representing a player's grid to hold arrays that represent a row of spaces, each subarray containing an object that's the back end representation of the image on a grid. [done]
+- array representing a player's grid to hold arrays that represent a row of spaces, each subarray containing an object that's the back end representation of the spaces on a grid. [done]
     - add properties to track how many ships are left: number
-- humanTurn: boolean
-- ship name to move stored as a string
-- ship setup mode as boolean
+- humanTurn: boolean [done]
+- ship name to move stored as a string [done]
+- ship setup mode as boolean [done]
 - a scratchpad array for computer to track what it has and hasn't tried yet if it finds a ship
-- boolean to determine if someone lost
+- boolean to determine if someone lost [done]
 
 FUNCTIONS:
 splash page: 
 - read the game mode menu to direct the player to the correct page [done]
 
 game:
-- display(array): iterates through array and update each object's el's src
+- display(array): iterates through array and update each object's el's background color [done]
     - !guessed && !ship = blue
     - ship && human's grid && !guessed = grey
     - ship && guessed = red
@@ -21,7 +21,7 @@ game:
 - log(message): appends message to the log on a new line
 - a function to handle space selection.  pass in a space object
     - do nothing if game is over
-    - if the player clicks on a space on the its own grid
+    - if the player clicks on a space on the its own grid [done]
         - check flag to determine if the player is to move a ship
             - if so, if there's a ship, pass that space's ship property to a function that handles moving ships
             - if not, do nothing
@@ -81,9 +81,9 @@ game:
     - el: HTMLSpanElement
     - isHumanGrid: boolean
     - selected: boolean - used for highlighting a ship to move
-- create a row of spaces images, that have a path to the backend space object  [done]
+- create a row of spaces spans, that have a path to the backend space object  [done]
     - the space objects of the same row are put into an array
-    - images have an onclick event listener that calls a function that processes selections, and passes in its backend representation
+    - spans have an onclick event listener that calls a function that processes selections, and passes in its backend representation
 - create a grid by making rows [done]
 
 INTERFACE: 
