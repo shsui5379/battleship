@@ -18,18 +18,21 @@ function initialize() {
     humanGridEl = document.getElementById("human");
     computerGridEl = document.getElementById("computer");
 
+    //states
+    humanTurn = true;
+    shipSetup = true;
+    roundOver = false;
+    shipToMove = undefined;
+
     //create grid
     grid(10, 10, humanGrid, humanGridEl, true);
     grid(10, 10, computerGrid, computerGridEl, false);
 
     placeRandomShips(computerGrid, SHIPS); //populate computer's grid with random ships
-    /*for (var array of computerGrid) {
-        for (var box of array) {
-            if (box.ship != undefined) {
-                box.el.style.backgroundColor = GREY;
-            }
-        }
-    }*/
+
+    //display
+    refresh(humanGrid, true);
+    refresh(computerGrid, false);
 }
 
 //objects
@@ -86,7 +89,7 @@ function grid(row, col, grid, gridEl, isOnHumanGrid) { //creates a grid of row r
     var tmp;
     headerRow(col, gridEl);
     for (var i=0; i!=row; i++) {
-        var tmp = addRow(i, col, gridEl, isOnHumanGrid);
+        tmp = addRow(i, col, gridEl, isOnHumanGrid);
         grid.push(tmp);
     }
 }
@@ -182,6 +185,52 @@ function canMove(board, initX, initY, horizontal, positiveDir) { //determine if 
         }
     }
     return true;
+}
+
+function refresh(board, shipsVisible) { //refreshed the displayed board based on array
+    for (var row of board) {
+        for (var space of row) {
+            if (shipsVisible) {
+                switch(space.ship) { //ship border colors
+                    case "aircraft carrier":
+                        space.el.style.borderColor = "#F44336";
+                        break;
+                    case "battleship":
+                        space.el.style.borderColor = "#9C27B0";
+                        break;
+                    case "destroyer":
+                        space.el.style.borderColor = "#8BC34A";
+                        break;
+                    case "submarine":
+                        space.el.style.borderColor = "#FF9800";
+                        break;
+                    case "patrol boat":
+                        space.el.style.borderColor = "#795548";
+                        break;
+                    default:
+                        space.el.style.borderColor = "black";
+                        break;
+                }    
+            }
+            switch (true) { //filling space colors
+                case !space.hasBeenGuessed && space.ship != undefined && shipsVisible:
+                    space.el.style.backgroundColor = GREY;
+                    break;
+                case space.ship != undefined && space.hasBeenGuessed:
+                    space.el.style.backgroundColor = RED;
+                    break;
+                case space.hasBeenGuessed && space.ship == undefined:
+                    space.el.style.backgroundColor = "white";
+                    break;
+                default:
+                    space.el.style.backgroundColor = BLUE;
+                    break;
+            }
+            if (space.highlight) {
+                space.el.style.borderColor = "#76FF03";
+            }
+        }
+    }
 }
 
 function randomInteger(lower, upper) {  //random number generator
