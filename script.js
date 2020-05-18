@@ -5,6 +5,10 @@ const RED = "#F44336";
 
 const A = 65; //capital letter ASCII offset
 
+//key which
+const UP = 38, DOWN = 40, LEFT = 37, RIGHT = 39;
+const CW = 50, CCW = 49;
+
 const SHIPS = [{name: "aircraft carrier", length: 5}, {name: "battleship", length: 4}, {name: "destroyer", length: 3}, {name: "submarine", length: 3}, {name: "patrol boat", length: 2}]; //ships and number of spaces
 
 function initialize(turnDeterminator) {
@@ -106,100 +110,6 @@ function grid(row, col, grid, gridEl, isOnHumanGrid, turnDeterminator) { //creat
         addRow(i, col, gridEl, isOnHumanGrid, turnDeterminator, grid);
     }
 }
-
-//populating computer's grid with ships
-function randomPlacement(maxX, maxY) { //generates a random coord for ship head and direction to lay out the ship
-    var output = {};
-    output.x = randomInteger(0, maxX);
-    output.y = randomInteger(0, maxY);
-    if (Math.random() > 0.5) {
-        output.horizontal = true;
-    } else {
-        output.horizontal = false;
-    }
-    if (Math.random() > 0.5) {
-        output.positiveDir = true;
-    } else {
-        output.positiveDir = false;
-    }
-    return output;
-}
-function placeRandomShips(board, ships) { //places ships randomly on a board
-    for (var ship of ships) {
-        var proposal = randomPlacement(board[0].length-1, board.length-1);
-        var canPlace = false;
-        var multiplier;
-        while (!canPlace) { //ensure placement won't overlap another ship or fall off the grid
-            var redo = false;
-            if (proposal.positiveDir) {
-                multiplier = 1;
-            } else {
-                multiplier = -1;
-            }
-            if (proposal.horizontal) {
-                for (var i=0; i!=ship.length; i++) {
-                    if (!canMove(board, proposal.x+(i*multiplier)-(1*multiplier), proposal.y, true, proposal.positiveDir)) {
-                        redo = true;
-                    }
-                }
-            } else {
-                for (var i=0; i!=ship.length; i++) {
-                    if (!canMove(board, proposal.x, proposal.y+(i*multiplier)-(1*multiplier), false, proposal.positiveDir)) {
-                        redo = true;
-                    }
-                }
-            }
-            if (redo) {
-                proposal = randomPlacement(board[0].length-1, board.length-1);
-            } else {
-                canPlace = true;
-            }
-        }
-        if (proposal.horizontal) { //writing in the ship
-            for (var i=0; i!=ship.length; i++) {
-                board[proposal.y][proposal.x+(i*multiplier)].ship = ship.name;
-            }
-        } else {
-            for (var i=0; i!=ship.length; i++) {
-                board[proposal.y+(i*multiplier)][proposal.x].ship = ship.name;
-            }
-        }
-    }
-}
-
-function canMove(board, initX, initY, horizontal, positiveDir) { //determine if a ship can be placed in the proposed placement
-    if (horizontal) {
-        if (positiveDir) { //to the right
-            if (initX+1 >= board[0].length) {
-                return false;
-            } else if (board[initY][initX+1].ship != undefined) {
-                return false;
-            }
-        } else { //to the left
-            if (!(initX-1>=0)) {
-                return false;
-            } else if (board[initY][initX-1].ship != undefined) {
-                return false;
-            }
-        }
-    } else {
-        if (positiveDir) { //down
-            if (initY+1 >= board.length) {
-                return false;
-            } else if (board[initY+1][initX].ship != undefined) {
-                return false;
-            }
-        } else { //up
-            if (!(initY-1>=0)) {
-                return false;
-            } else if (board[initY-1][initX].ship != undefined) {
-                return false;
-            }
-        }
-    }
-    return true;
-}
-
 function presetShip(board, ships) { //preloads ships onto a board for user configuration
     for (var ship in ships) {
         for (var i=0; i!=ships[ship].length; i++) {
@@ -207,8 +117,7 @@ function presetShip(board, ships) { //preloads ships onto a board for user confi
         }
     }
 }
-
-function refresh(board, shipsVisible) { //refreshed the displayed board based on array
+function refresh(board, shipsVisible) { //refresh the displayed board based on array
     for (var row of board) {
         for (var space of row) {
             if (shipsVisible) {
@@ -252,6 +161,171 @@ function refresh(board, shipsVisible) { //refreshed the displayed board based on
             }
         }
     }
+}
+
+//populating computer's grid with ships
+function randomPlacement(maxX, maxY) { //generates a random coord for ship head and direction to lay out the ship
+    var output = {};
+    output.x = randomInteger(0, maxX);
+    output.y = randomInteger(0, maxY);
+    if (Math.random() > 0.5) {
+        output.horizontal = true;
+    } else {
+        output.horizontal = false;
+    }
+    if (Math.random() > 0.5) {
+        output.positiveDir = true;
+    } else {
+        output.positiveDir = false;
+    }
+    return output;
+}
+function placeRandomShips(board, ships) { //places ships randomly on a board
+    for (var ship of ships) {
+        var proposal = randomPlacement(board[0].length-1, board.length-1);
+        while (!canPlaceShip(board, proposal, ship.length)) { //ensure placement won't overlap another ship or fall off the grid
+            proposal = randomPlacement(board[0].length-1, board.length-1);
+        }
+        placeShip(board, proposal, ship.length, ship.name);
+    }
+}
+
+//checks to ensure that ships won't overlap or fall off the edge
+function canMoveSpace(board, initX, initY, horizontal, positiveDir, ship) { //determine if a ship can be placed in a certain space
+    if (horizontal) {
+        if (positiveDir) { //to the right
+            if (initX+1 >= board[0].length) {
+                return false;
+            } else if (board[initY][initX+1].ship != undefined && board[initY][initX+1].ship != ship) {
+                return false;
+            }
+        } else { //to the left
+            if (!(initX-1>=0)) {
+                return false;
+            } else if (board[initY][initX-1].ship != undefined && board[initY][initX-1].ship != ship) {
+                return false;
+            }
+        }
+    } else {
+        if (positiveDir) { //down
+            if (initY+1 >= board.length) {
+                return false;
+            } else if (board[initY+1][initX].ship != undefined && board[initY+1][initX].ship != ship) {
+                return false;
+            }
+        } else { //up
+            if (!(initY-1>=0)) {
+                return false;
+            } else if (board[initY-1][initX].ship != undefined && board[initY-1][initX].ship != ship) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+function canMoveShip (board, coords, horizontal, posDir, ship) { //returns if the ship can move in the board
+    for (var coord of coords) {
+        if (!canMoveSpace(board, coord.x, coord.y, horizontal, posDir, ship)) {
+            return false;
+        }
+    }
+    return true;
+}
+function canPlaceShip(board, proposal, length, ship) { //determines if a proposed ship can be placed on the board
+    if (proposal.positiveDir) {
+        var multiplier = 1;
+    } else {
+        var multiplier = -1;
+    }
+    if (proposal.horizontal) {
+        for (var i=0; i!=length; i++) {
+            if (!canMoveSpace(board, proposal.x+(i*multiplier)-(1*multiplier), proposal.y, true, proposal.positiveDir, ship)) {
+                return false;
+            }
+        }
+    } else {
+        for (var i=0; i!=length; i++) {
+            if (!canMoveSpace(board, proposal.x, proposal.y+(i*multiplier)-(1*multiplier), false, proposal.positiveDir, ship)) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+//allowing a player to configure where to place ships
+function translateShip(board, coords, horizontal, posDir, ship) { //translates a ship
+    if (posDir) {
+        var multiplier = 1;
+    } else {
+        var multiplier = -1;
+    }
+    if (posDir) {
+        coords.reverse();
+    }
+    for (var coord of coords) {
+        board[coord.y][coord.x].ship = undefined;
+        if (horizontal) {
+            board[coord.y][coord.x+(1*multiplier)].ship = ship;
+        } else {
+            board[coord.y+(1*multiplier)][coord.x].ship = ship;
+        }
+    }
+}
+function move(board, event) { //handles events for moving ships
+    if (shipSetup && shipToMove != undefined) {
+        if (event.which >= 37 && event.which <= 40) { //arrow keys for moving ship
+            var posDir, horizontal;
+            if (event.which == UP || event.which == DOWN) {
+                horizontal = false;
+            } else {
+                horizontal = true;
+            }
+            if (event.which == DOWN || event.which == RIGHT) {
+                posDir = true;
+            } else {
+                posDir = false;
+            }
+            var coords = getShipCoords(board, shipToMove);
+            if (canMoveShip(board, coords, horizontal, posDir, shipToMove)) {
+                translateShip(board, coords, horizontal, posDir, shipToMove);
+                refresh(board, true);
+            }
+        } else if (event.which == CW || event.which == CCW) { //rotations
+
+        }
+    }
+}
+function placeShip(board, proposal, length, ship) { //adds the propsed ship to the board
+    if (proposal.positiveDir) {
+        var multiplier = 1;
+    } else {
+        var multiplier = -1;
+    }
+    if (proposal.horizontal) {
+        for (var i=0; i!=length; i++) {
+            board[proposal.y][proposal.x+(i*multiplier)].ship = ship;
+        }
+    } else {
+        for (var i=0; i!=length; i++) {
+            board[proposal.y+(i*multiplier)][proposal.x].ship = ship;
+        }
+    }
+}
+
+function getShipCoords(board, ship) { //returns a list of coords of the given ship on the board
+    var output = [];
+    for (var row of board) {
+        for (var space of row) {
+            if (space.ship == ship) {
+                var tmp = {};
+                tmp.x = space.x;
+                tmp.y = space.y;
+                output.push(tmp);
+            }
+        }
+    }
+    return output;
 }
 
 function randomInteger(lower, upper) {  //random number generator
