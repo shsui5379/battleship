@@ -3,14 +3,18 @@
 	<head>
 		<title>Battleship</title>
 		<style></style>
-		<script></script>
+		<script>
+			function standardTurn() {
+
+			}
+		</script>
 		<link rel="stylesheet" href="style.css" />
 		<script src="script.js"></script>
 	</head>
-	<body onload="initialize();">
+	<body onload="initialize(standardTurn);" onkeypress="move(event);">
 		<div id="logBox"></div>
 		<div class="grid" id="human"><span>You</span><br /></div>
 		<div class="grid" id="computer"><span>Computer</span><br /></div>
-		<button id="btn" onclick="buttonAction();">Start Game</button>
+		<button id="btn" onclick="buttonAction();">Start</button>
 	</body>
 </html>
