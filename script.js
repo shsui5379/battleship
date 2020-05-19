@@ -168,16 +168,8 @@ function randomPlacement(maxX, maxY) { //generates a random coord for ship head 
     var output = {};
     output.x = randomInteger(0, maxX);
     output.y = randomInteger(0, maxY);
-    if (Math.random() > 0.5) {
-        output.horizontal = true;
-    } else {
-        output.horizontal = false;
-    }
-    if (Math.random() > 0.5) {
-        output.positiveDir = true;
-    } else {
-        output.positiveDir = false;
-    }
+    output.horizontal = (Math.random() > 0.5);
+    output.positiveDir = (Math.random() > 0.5);
     return output;
 }
 function placeRandomShips(board, ships) { //places ships randomly on a board
@@ -275,24 +267,27 @@ function translateShip(board, coords, horizontal, posDir, ship) { //translates a
 function move(board, event) { //handles events for moving ships
     if (shipSetup && shipToMove != undefined) {
         if (event.which >= 37 && event.which <= 40) { //arrow keys for moving ship
-            var posDir, horizontal;
-            if (event.which == UP || event.which == DOWN) {
-                horizontal = false;
-            } else {
-                horizontal = true;
-            }
-            if (event.which == DOWN || event.which == RIGHT) {
-                posDir = true;
-            } else {
-                posDir = false;
-            }
+            var horizontal = (event.which == LEFT || event.which == RIGHT);
+            var posDir = (event.which == DOWN || event.which == RIGHT);
             var coords = getShipCoords(board, shipToMove);
             if (canMoveShip(board, coords, horizontal, posDir, shipToMove)) {
                 translateShip(board, coords, horizontal, posDir, shipToMove);
                 refresh(board, true);
             }
         } else if (event.which == CW || event.which == CCW) { //rotations
-
+            var coords = getShipCoords(board, shipToMove);
+            var summary = getSummary(coords);
+            summary.horizontal = !summary.horizontal;
+            if ((event.which == CCW && !summary.horizontal) || (event.which == CW && summary.horizontal)) {
+                summary.positiveDir = !summary.positiveDir;
+            }
+            if (canPlaceShip(board, summary, coords.length, shipToMove)) {
+                for (var coord of coords) {
+                    board[coord.y][coord.x].ship = undefined;
+                }
+                placeShip(board, summary, coords.length, shipToMove);
+                refresh(board, true);
+            }
         }
     }
 }
@@ -325,6 +320,14 @@ function getShipCoords(board, ship) { //returns a list of coords of the given sh
             }
         }
     }
+    return output;
+}
+function getSummary(coords) { //summarizes the ship's head coord and direction of layout
+    var output = {};
+    output.x = coords[0].x;
+    output.y = coords[0].y;
+    output.horizontal = (coords[0].y == coords[1].y);
+    output.positiveDir = ((output.horizontal && coords[0].x < coords[1].x) || (!output.horizontal && coords[0].y < coords[1].y));
     return output;
 }
 
