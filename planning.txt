@@ -42,7 +42,7 @@ game:
                         - return if the space has a ship, so computer knows when it hit something
                 - if so, do nothing
             - if not, do nothing 
-- moving a ship
+- moving a ship [done]
     - when a ship has been selected, the object for their spaces will be marked as selected, so that display would outline the spaces. all other ships would have selected marked false
     - ship name stored in a global
     - press 1 rotates ship clockwise.  2 for counterclockwise.  rotation happens around the top of left most space occupied by the ship. make sure that the center of rotation's distance to an edge isn't shorter than the ship, in the direction the ship is to rotate in 
@@ -115,7 +115,7 @@ FLOW:
 - player selects a mode on index.html, and button onclick brings the player to the correct page for the mode [done]
 - generate grids for both players [done]
 - randomize ship placements for computer's grid [done]
-- let player move ships until lock button is pressed
+- let player move ships until lock button is pressed [done]
 - when it's the human's turn, click spaces on opponent's grid, which calls selection function, passing in that space's backend object to handle what happends
 - when it's computer's turn, computer picks random column and row on human's grid and calls selection function while passing in that space's backend object
 - keep going back and forth until a player has 0 ships left
