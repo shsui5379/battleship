@@ -63,7 +63,29 @@ Space.prototype.select = function(turnDeterminator, event) { //handles a space b
         } else if (((this.isOnHumanGrid && event == undefined) || (!this.isOnHumanGrid && humanTurn)) && !this.hasBeenGuessed) { //torpedo opponent's grid
             this.hasBeenGuessed = true;
             refresh(this.gridArr, this.isOnHumanGrid);
-            log("test");
+            var sunkShip = false;
+            if (this.ship != undefined) { //detecting for sunken ship
+                if (shipSunk(this.gridArr, this.ship)) {
+                    this.gridArr.ships--;
+                    sunkShip = true;
+                }
+            }
+            log(messageGenerator(this, humanTurn, sunkShip));
+            if (humanGrid.ships == 0 || computerGrid.ships == 0) { //detecting if a player lost
+                roundOver = true;
+                if (humanTurn) {
+                    var loser = "the computer's";
+                    var winner = "You";
+                } else {
+                    var loser = "your";
+                    var winner = "The computer";
+                }
+                log(winner + " sunk all of " + loser + " ships.");
+            } else if (turnDeterminator) { //determine who goes next
+                humanTurn = true;
+            } else {
+                humanTurn = false;
+            }
         }
     }
 }
@@ -156,7 +178,7 @@ function refresh(board, shipsVisible) { //refresh the displayed board based on a
                     space.el.style.backgroundColor = BLUE;
                     break;
             }
-            if (shipsVisible && shipToMove != undefined && space.ship == shipToMove) {
+            if (shipsVisible && shipToMove != undefined && space.ship == shipToMove) { //highlighting ship to move
                 space.el.style.borderColor = "#76FF03";
             }
         }
@@ -186,9 +208,9 @@ function placeRandomShips(board, ships) { //places ships randomly on a board
 function canMoveSpace(board, initX, initY, horizontal, positiveDir, ship) { //determine if a ship can be placed in a certain space
     if (horizontal) {
         if (positiveDir) { //to the right
-            if (initX+1 >= board[0].length) {
+            if (initX+1 >= board[0].length) { //within grid
                 return false;
-            } else if (board[initY][initX+1].ship != undefined && board[initY][initX+1].ship != ship) {
+            } else if (board[initY][initX+1].ship != undefined && board[initY][initX+1].ship != ship) { //not overlapping
                 return false;
             }
         } else { //to the left
@@ -252,12 +274,12 @@ function translateShip(board, coords, horizontal, posDir, ship) { //translates a
     } else {
         var multiplier = -1;
     }
-    if (posDir) {
+    if (posDir) { //ensure that a ship keeps its length
         coords.reverse();
     }
     for (var coord of coords) {
-        board[coord.y][coord.x].ship = undefined;
-        if (horizontal) {
+        board[coord.y][coord.x].ship = undefined; //remove old
+        if (horizontal) { //add new
             board[coord.y][coord.x+(1*multiplier)].ship = ship;
         } else {
             board[coord.y+(1*multiplier)][coord.x].ship = ship;
@@ -270,7 +292,7 @@ function move(board, event) { //handles events for moving ships
             var horizontal = (event.which == LEFT || event.which == RIGHT);
             var posDir = (event.which == DOWN || event.which == RIGHT);
             var coords = getShipCoords(board, shipToMove);
-            if (canMoveShip(board, coords, horizontal, posDir, shipToMove)) {
+            if (canMoveShip(board, coords, horizontal, posDir, shipToMove)) { //move ship if movable
                 translateShip(board, coords, horizontal, posDir, shipToMove);
                 refresh(board, true);
             }
@@ -281,8 +303,8 @@ function move(board, event) { //handles events for moving ships
             if ((event.which == CCW && !summary.horizontal) || (event.which == CW && summary.horizontal)) {
                 summary.positiveDir = !summary.positiveDir;
             }
-            if (canPlaceShip(board, summary, coords.length, shipToMove)) {
-                for (var coord of coords) {
+            if (canPlaceShip(board, summary, coords.length, shipToMove)) { //rotate ship of rotatable
+                for (var coord of coords) { //delete old ship
                     board[coord.y][coord.x].ship = undefined;
                 }
                 placeShip(board, summary, coords.length, shipToMove);
@@ -331,6 +353,42 @@ function getSummary(coords) { //summarizes the ship's head coord and direction o
     return output;
 }
 
+function shipSunk(board, ship) { //returns whether or not all of that ship's spaces has been torpedoed
+    var coords = getShipCoords(board, ship);
+    for (var coord of coords) {
+        if (!board[coord.y][coord.x].hasBeenGuessed) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function messageGenerator(space, human, sunk) { //returns a string that summarizes what happened that turn
+    var output = "";
+    if (human) {
+        output += "You ";
+    } else {
+        output += "The computer ";
+    }
+    output += "torpedoed " + String.fromCharCode(A+space.x) + parseInt(space.y+1);
+    if (space.ship != undefined) {
+        output += " and hit the "
+        if (human) {
+            output += "computer's ";
+        } else {
+            output += "your ";
+        }
+        output += space.ship;
+        if (sunk) {
+            output += " and it sunk";
+        }
+    } else {
+        output += " and hit nothing";
+    }
+    output += ".";
+    return output;
+}
+
 function randomInteger(lower, upper) {  //random number generator
     var multiplier = upper - lower + 1;
     var rnd = Math.floor((Math.random() * multiplier) + lower);
@@ -338,20 +396,22 @@ function randomInteger(lower, upper) {  //random number generator
 }
 
 function buttonAction() {
-    if (shipSetup) {
+    if (shipSetup) { //for starting round
         shipSetup = false;
         shipToMove = undefined;
         buttonEl.innerHTML = "Reset";
         refresh(humanGrid, true);
     } else {
-        if (confirm("Are you sure you want to reset the game?  This cannot be undone.")) {
+        if (confirm("Are you sure you want to reset the game?  This cannot be undone.")) { //for starting a new game
             shipSetup = true;
+            roundOver = false;
+            humanTurn = true;
             buttonEl.innerHTML = "Start"
         }
     }
 }
 
 function log(message) {
-    logStr += message + "<br />";
+    logStr = message + "<br /><br />" + logStr;
     logEl.innerHTML = logStr;
 }
