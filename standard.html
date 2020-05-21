@@ -4,17 +4,17 @@
 		<title>Battleship</title>
 		<style></style>
 		<script>
-			function standardTurn() {
-
+			function turnDeterminator(selected) {
+				return ((!selected.isOnHumanGrid && selected.ship != undefined) || (selected.isOnHumanGrid && selected.ship == undefined));
 			}
 		</script>
 		<link rel="stylesheet" href="style.css" />
 		<script src="script.js"></script>
 	</head>
-	<body onload="initialize(standardTurn);" onkeydown="move(humanGrid, event);">
+	<body onload="initialize();" onkeydown="move(humanGrid, event);">
 		<div id="logBox"></div>
-		<div class="grid" id="human"><span>You</span><br /></div>
-		<div class="grid" id="computer"><span>Computer</span><br /></div>
+		<div class="grid" id="human"><span id="humanLabel">You</span><br /></div>
+		<div class="grid" id="computer"><span id="computerLabel">Computer</span><br /></div>
 		<button id="btn" onclick="buttonAction();">Start</button>
 	</body>
 </html>

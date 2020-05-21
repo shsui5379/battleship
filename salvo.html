@@ -4,17 +4,46 @@
 		<title>Battleship</title>
 		<style></style>
 		<script>
-			function salvoTurn() {
-
+			function def() {
+				humanStreak = false;
+				computerStreak = false;
+			}
+			function turnDeterminator(selection) {
+				if (humanTurn) { //tracking how many turns left
+					if (!humanStreak) {
+						humanHits = humanGrid.ships;
+						humanStreak = true;
+					}
+				} else {
+					if (!computerStreak) {
+						computerHits = computerGrid.ships;
+						computerStreak = true;
+					}
+				}
+				if (humanStreak) {
+					humanHits--;
+					if (humanHits == 0 || selection.ship != undefined) { //computer goes when human hit something or runs out of turns
+						humanStreak = false;
+						return false;
+					}
+					return true;
+				} else {
+					computerHits--;
+					if (computerHits == 0 || selection.ship != undefined) { //human goes when computer hits something or runs out of turns
+						computerStreak = false;
+						return true;
+					}
+					return false;
+				}
 			}
 		</script>
 		<link rel="stylesheet" href="style.css" />
 		<script src="script.js"></script>
 	</head>
-	<body onload="initialize(salvoTurn);" onkeydown="move(humanGrid, event);">
+	<body onload="initialize(); def();" onkeydown="move(humanGrid, event);">
 		<div id="logBox"></div>
-		<div class="grid" id="human"><span>You</span><br /></div>
-		<div class="grid" id="computer"><span>Computer</span><br /></div>
+		<div class="grid" id="human"><span id="humanLabel">You</span><br /></div>
+		<div class="grid" id="computer"><span id="computerLabel">Computer</span><br /></div>
 		<button id="btn" onclick="buttonAction();">Start</button>
 	</body>
 </html>

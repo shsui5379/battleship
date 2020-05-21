@@ -11,7 +11,7 @@ const CW = 50, CCW = 49;
 
 const SHIPS = [{name: "aircraft carrier", length: 5}, {name: "battleship", length: 4}, {name: "destroyer", length: 3}, {name: "submarine", length: 3}, {name: "patrol boat", length: 2}]; //ships and number of spaces
 
-function initialize(turnDeterminator) {
+function initialize() {
     //grids
     humanGrid = [];
     humanGrid.ships = 5;
@@ -23,6 +23,8 @@ function initialize(turnDeterminator) {
     computerGridEl = document.getElementById("computer");
     logEl = document.getElementById("logBox");
     buttonEl = document.getElementById("btn");
+    humanLabelEl = document.getElementById("humanLabel");
+    computerLabelEl = document.getElementById("computerLabel");
 
     //states
     humanTurn = true;
@@ -30,10 +32,12 @@ function initialize(turnDeterminator) {
     roundOver = false;
     shipToMove = undefined;
     logStr = "";
+    interval = undefined;
+    computerScratchpad = undefined;
 
     //create grid
-    grid(10, 10, humanGrid, humanGridEl, true, turnDeterminator);
-    grid(10, 10, computerGrid, computerGridEl, false, turnDeterminator);
+    grid(10, 10, humanGrid, humanGridEl, true);
+    grid(10, 10, computerGrid, computerGridEl, false);
 
     //populate grids
     placeRandomShips(computerGrid, SHIPS);
@@ -53,7 +57,7 @@ function Space(x, y, isOnHumanGrid, el, gridArr) { //represents a space on the g
     this.hasBeenGuessed = false;
     this.gridArr = gridArr;
 }
-Space.prototype.select = function(turnDeterminator, event) { //handles a space being selected
+Space.prototype.select = function(event) { //handles a space being selected
     if (!roundOver) {
         if (shipSetup) { 
             if (this.isOnHumanGrid && this.ship != undefined) { //selecting a ship to move
@@ -81,12 +85,41 @@ Space.prototype.select = function(turnDeterminator, event) { //handles a space b
                     var winner = "The computer";
                 }
                 log(winner + " sunk all of " + loser + " ships.");
-            } else if (turnDeterminator) { //determine who goes next
+            } else if (turnDeterminator(this)) { //determine who goes next
                 humanTurn = true;
+                computerLabelEl.style.color = "#FF6E40";
+                humanLabelEl.style.color = "initial";
+                if (interval != undefined) { //end computer turn
+                    clearInterval(interval);
+                    interval = undefined;
+                }
             } else {
                 humanTurn = false;
+                computerLabelEl.style.color = "initial";
+                humanLabelEl.style.color = "#FF6E40";
+                if (interval == undefined) { //start computer turn
+                    interval = setInterval(computerTurn, 1000);
+                }
             }
         }
+    } else if (interval != undefined) {
+        clearInterval(interval);
+        interval = undefined;
+    }
+}
+
+function computerTurn() { //computer picking a space to torpedo
+    var pre = humanGrid.ships;
+    if (computerScratchpad == undefined) { //random
+        var x = randomInteger(0, humanGrid[0].length-1);
+        var y = randomInteger(0, humanGrid.length-1);
+        if (!humanGrid[y][x].hasBeenGuessed) {
+            humanGrid[y][x].select();
+        } else {
+            return computerTurn();
+        }
+    } else { //make intelligent guesses if the last torpedo hit something
+
     }
 }
 
@@ -105,31 +138,31 @@ function headerRow(spaces, grid) { //creates column labels: A-J
     var end = document.createElement("br");
     grid.appendChild(end);
 }
-function addSpace(x, y, isOnHumanGrid, grid, callback, gridArr) { //creates a space on the board
+function addSpace(x, y, isOnHumanGrid, grid, gridArr) { //creates a space on the board
     var tmpEl = document.createElement("span");
     var tmpObj = new Space(x, y, isOnHumanGrid, tmpEl, gridArr);
     tmpEl.className = "space";
     tmpEl.space = tmpObj;
-    tmpEl.addEventListener("click", function() {tmpEl.space.select(callback, event)});
+    tmpEl.addEventListener("click", function() {tmpEl.space.select(event)});
     grid.appendChild(tmpEl);
     return tmpObj;
 }
-function addRow(label, spaces, grid, isOnHumanGrid, callback, gridArr) { //creates a row number label with spaces space on grid grid
+function addRow(label, spaces, grid, isOnHumanGrid, gridArr) { //creates a row number label with spaces space on grid grid
     var rowArr = [];
     labelSpace(label+1, grid);
     for (var i=0; i!=spaces; i++) {
-        var tmp = addSpace(i, label, isOnHumanGrid, grid, callback, gridArr);
+        var tmp = addSpace(i, label, isOnHumanGrid, grid, gridArr);
         rowArr.push(tmp);
     }
     var end = document.createElement("br");
     grid.appendChild(end);
     gridArr.push(rowArr);
 }
-function grid(row, col, grid, gridEl, isOnHumanGrid, turnDeterminator) { //creates a grid of row rows, col columns
+function grid(row, col, grid, gridEl, isOnHumanGrid) { //creates a grid of row rows, col columns
     var tmp;
     headerRow(col, gridEl);
     for (var i=0; i!=row; i++) {
-        addRow(i, col, gridEl, isOnHumanGrid, turnDeterminator, grid);
+        addRow(i, col, gridEl, isOnHumanGrid, grid);
     }
 }
 function presetShip(board, ships) { //preloads ships onto a board for user configuration
@@ -396,19 +429,22 @@ function randomInteger(lower, upper) {  //random number generator
 }
 
 function buttonAction() {
+    humanTurn = true;
+    humanLabelEl.style.color = "initial";
+    computerLabelEl.style.color = "#FF6E40";
+    shipToMove = undefined;
+    roundOver = false;
     if (shipSetup) { //for starting round
         shipSetup = false;
-        shipToMove = undefined;
         buttonEl.innerHTML = "Reset";
-        refresh(humanGrid, true);
     } else {
         if (confirm("Are you sure you want to reset the game?  This cannot be undone.")) { //for starting a new game
             shipSetup = true;
-            roundOver = false;
-            humanTurn = true;
             buttonEl.innerHTML = "Start"
         }
     }
+    refresh(humanGrid, true);
+    refresh(computerGrid, false);
 }
 
 function log(message) {
