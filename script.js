@@ -118,8 +118,60 @@ function computerTurn() { //computer picking a space to torpedo
         } else {
             return computerTurn();
         }
+        if (humanGrid[y][x].ship != undefined && pre == humanGrid.ships) { //notes that computer hit something
+            computerScratchpad = {x: x, y: y, dir: randomInteger(1, 4), step: 0, dirTried: 1};
+        }
     } else { //make intelligent guesses if the last torpedo hit something
-
+        computerScratchpad.step++;
+        if (computerScratchpad.dir > 4) {
+            computerScratchpad.dir = 1;
+        }
+        if (computerScratchpad.dirTried == 5) {
+            computerScratchpad = undefined;
+            return computerTurn();
+        }
+        if (computerScratchpad.dir % 2 == 1) { //1: up, 2: down, 3: left, 4: right
+            var incriment = -1;
+        } else {
+            var incriment = 1;
+        }
+        if (computerScratchpad.dir < 3) {
+            var next = computerScratchpad.y+incriment*computerScratchpad.step;
+            if (next >= 0 && next <= humanGrid.length-1) { //selection must exist on the grid
+                var selection = humanGrid[next][computerScratchpad.x];
+            } else {
+                computerScratchpad.dir++;
+                computerScratchpad.step = 0;
+                computerScratchpad.dirTried++;
+                return computerTurn();
+            }
+        } else {
+            var next = computerScratchpad.x+incriment*computerScratchpad.step;
+            if (next >= 0 && next <= humanGrid[0].length-1) {
+                var selection = humanGrid[computerScratchpad.y][next];
+            } else {
+                computerScratchpad.dir++;
+                computerScratchpad.step = 0;
+                computerScratchpad.dirTried++;
+                return computerTurn();
+            }
+        }
+        if (!selection.hasBeenGuessed) { //don't select something that has been selected already
+            selection.select();
+            if (selection.ship == undefined) { //change direction if nothing was hit
+                computerScratchpad.dir++;
+                computerScratchpad.dirTried++;
+                computerScratchpad.step = 0;
+            }
+        } else {
+            computerScratchpad.dir++;
+            computerScratchpad.step = 0;
+            computerScratchpad.dirTried++;
+            return computerTurn();
+        }
+        if (humanGrid.ships != pre) { //stop when something sunk, or tried all directions
+            computerScratchpad = undefined;
+        }
     }
 }
 
