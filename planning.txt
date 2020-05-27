@@ -67,7 +67,7 @@ game:
         - try going consecutive spaces in each of the 4 directions.  Try a new direction once it finds a shipless space
         - keep going like that until a human ship has sunk.  then clear its scratchpad
 - RNG [done]
-- reset
+- reset [done]
     - make all guessed states false
     - display
     - allow moving ships again
