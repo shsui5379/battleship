@@ -261,7 +261,7 @@ Space.prototype.select = function(event) { //handles a space being selected
                     var loser = "your";
                     var winner = "The computer";
                 }
-                log(winner + " sunk all of " + loser + " ships.");
+                log(winner + " sunk all of " + loser + " ships.  Press Reset to play again.");
             } else if (turnDeterminator(this)) { //determine who goes next
                 humanTurn = true;
                 computerLabelEl.style.color = "#FF6E40";
