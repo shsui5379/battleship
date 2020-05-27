@@ -497,8 +497,25 @@ function buttonAction() {
         if (confirm("Are you sure you want to reset the game?  This cannot be undone.")) { //for starting a new game
             shipSetup = true;
             buttonEl.innerHTML = "Start"
+            humanGrid.reset();
+            computerGrid.reset();
+            computerGrid.placeRandomShips(SHIPS);
+            humanGrid.ships = 5;
+            logStr = "";
+            logEl.innerHTML = "";
         }
     }
     humanGrid.refresh();
     computerGrid.refresh();
+}
+
+Grid.prototype.reset = function() { //resets the guessed states of the grid.  If the grid isn't the human's grid, also erase the ships
+    for (var row of this) {
+        for (var space of row) {
+            space.hasBeenGuessed = false;
+            if (!this.humanGrid) {
+                space.ship = undefined;
+            }
+        }
+    }
 }
